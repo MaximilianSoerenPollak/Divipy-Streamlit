@@ -1,0 +1,4 @@
+This will be the order of the Program in chronological order:
+Script looks up all stocks, and saves all the ones with dividends.
+User fills out all the filters and checkboxes.
+
