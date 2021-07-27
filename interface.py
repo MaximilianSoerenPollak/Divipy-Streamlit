@@ -1,57 +1,7 @@
 #%%
-from logging import Filter
-from re import L
-import string
-from altair.vegalite.v4.schema.channels import StrokeOpacity
-
 import numpy as np
 import pandas as pd
 import streamlit as st
-from altair.vegalite.v4.schema.core import Month
-from numpy.core.fromnumeric import sort
-
-# %%
-
-# %%
-# div_df_final
-# # %%
-# div_goal = 3000
-# yearly_goal = div_goal * 12
-# monthly_invest = 300
-# max_percent = 0.2
-# min_stocks = 100/(100*max_percent)
-# max_invest_p_share = max_percent * monthly_invest
-# max_per_sec = 2
-# # %%
-# sample_10 = div_df_final.sample(20)
-# # %%
-# sectors = sample_10["Sector"].unique().tolist()
-# # %%
-# sorted_20 = sample_10.sort_values("Dividend Yield", ascending=False)
-# # %%
-# len(Filter_df)
-# # %%
-# 3000 * 0.2
-# # %%
-# 600*12 / 0.04
-# # %%
-# 300/12
-# # %%
-# 25/0.5225
-# # %%
-# (0.04/12)*47.9
-# per = int(len(Filter_df) / 4)
-# top_25 = Filter_df[:per]
-# middle_50 = Filter_df[per:per*3]
-# lower_25 = Filter_df[per*3:]
-
-# middle_50
-#  # %%
-# min_stocks
-# %%-
-# """
-# Starting from here we will build the website.
-# """
 # %%
 #-----------FUNCTIONS---------------------
 def get_df():
@@ -102,6 +52,16 @@ def get_sorted_filtered_df(df,sectors,max_stock_sector,max_stocks):
     Filter_df  = df[df.index.isin(flat_list)][:max_stocks]
     return Filter_df
 
+def drop_cols(df):
+    cols_drop = ['52 Week low', '52 Week high',
+       '5y. Avg.Div. yield', 'Website',
+       'Market Cap', 'Reccomendation', 'Profit Margin', "Long Business Summary","Beta"]
+    df_new = df.drop(cols_drop, axis=1)
+    df_new = df_new[["Long_name","Symbol","Sector","Industry","Current Price", "Dividend Rate", "Dividend Yield","Payout Ratio"]].reset_index()
+    df_new = df_new.rename({"Long_name": "Name", "Symbol": "Ticker", "Current Price": "Price p. Share"}, axis=1)
+    df_new.drop("index", axis=1, inplace=True)
+    df_new.index = np.arange(1, len(df_new) + 1)
+    return df_new
 
 def get_min_sec_stocks(nr_of_stocks, sectors):
     """
@@ -120,6 +80,8 @@ def get_min_sec_stocks(nr_of_stocks, sectors):
         return mss
     except ZeroDivisionError:
         return 10
+
+
 # %%
 df = get_df()
 # %%
@@ -157,4 +119,9 @@ with col3:
 # %%
 test_df = get_sorted_filtered_df(df,["Financial Services", "Healthcare", "Energy", "Industrials"], 26, 70)
 # test_df.shape
+# %%
+df.columns
+# %%
+df1 = drop_cols(get_sorted_filtered_df(df,["Financial Services", "Healthcare", "Energy", "Industrials"], 26, 70))
+df1
 # %%
