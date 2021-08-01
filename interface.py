@@ -534,42 +534,29 @@ with st.beta_expander("Stocks when your goal is reached"):
         retye = st.empty()
     with col7:
         yearsye = st.empty()
-df_1_place.write(df_1)
-df_2_place.write(df_2)
-df_5_place.write(df_5)
-df_ye_place.write(df_ye)
-df_1_place.write(df_1)
-value1.write(f"Money Invested with reeinvesting: {df_1['Value of Shares'].sum():.2f}€")
-val1_nodye.write(f"Money Invested: {y1*(monthly_invest*12):.2f}€")
-div1_py.write(f"Dividends Reinvested: {(df_1['Value of Shares'].sum()-y1*(monthly_invest*12)):.2f}€")
-div1.write(f"Dividends per Year: {df_1['Total Dividends'].sum():.3f}€")
-div1m.write(f"Dividends per Month: {df_1['Monthly Dividends'].sum():.3f}€")
-ret_1 = df_1["Total Dividends"].sum() / df_1["Value of Shares"].sum()
-ret1.write(f"Return: {ret_1*100:.2f}%")
-df_2_place.write(df_2)
-value2.write(f"Money Invested with reeinvesting: {df_2['Value of Shares'].sum():.2f}€")
-val2_nodye.write(f"Money Invested: {y2*(monthly_invest*12):.2f}€")
-div2_py.write(f"Dividends Reinvested: {(df_2['Value of Shares'].sum()-y2*(monthly_invest*12)):.2f}€")
-div2.write(f"Dividends per Year: {df_2['Total Dividends'].sum():.3f}€")
-div2m.write(f"Dividends per Month: {df_2['Monthly Dividends'].sum():.3f}€")
-ret_2 = df_2["Total Dividends"].sum() / df_2["Value of Shares"].sum()
-ret2.write(f"Return: {ret_2*100:.2f}%")
-df_5_place.write(df_5)
-value5.write(f"Money Invested with reeinvesting: {df_5['Value of Shares'].sum():.2f}€")
-div5_py.write(f"Dividends Reinvested: {(df_5['Value of Shares'].sum()-y5*(monthly_invest*12)):.2f}€")
-val5_nodye.write(f"Money Invested: {y5*(monthly_invest*12):.2f}€")
-div5.write(f"Dividends per Year: {df_5['Total Dividends'].sum():.3f}€")
-divm5.write(f"Dividends per Month: {df_5['Monthly Dividends'].sum():.3f}€")
-ret_5 = df_5["Total Dividends"].sum() / df_5["Value of Shares"].sum()
-ret5.write(f"Return per year: {ret_5*100:.2f}%")
-df_ye_place.write(df_ye)
-valueye.write(f"Money Invested with reeinvesting: {df_ye['Value of Shares'].sum():.2f}€")
-divye_py.write(f"Dividends Reinvested: {(df_ye['Value of Shares'].sum()-ye*(monthly_invest*12)):.2f}€")
-val_nodye.write(f"Money Invested: {ye*(monthly_invest*12):.2f}€")
-divye.write(f"Dividends per Year: {df_ye['Total Dividends'].sum():.3f}€")
-divmye.write(f"Dividends per Month: {df_ye['Monthly Dividends'].sum():.3f}€")
-ret_ye = df_ye["Total Dividends"].sum() / df_ye["Value of Shares"].sum()
-retye.write(f"Return: {ret_ye*100:.2f}%")
+# Defining all lists needed to itterate and make sure that all different DataFrames get taken.
+value_list = [value1, value2, value5, valueye]
+df_list = [df_1, df_2, df_5, df_ye]
+df_place_list = [df_1_place, df_2_place, df_5_place, df_ye_place]
+val_list =[val1_nodye, val2_nodye, val5_nodye, val_nodye]
+year_list = [y1, y2, y5, ye]
+divpy_list = [div1_py, div2_py, div5_py, divye_py]
+div_list =[div1, div2, div5, divye]
+divm_list = [div1m, div2m, divm5, divmye]
+ret_list = [ret1, ret2, ret5, retye]
+# dfe_list = [df_1_e, df_2_e, df_5_e, df_ye_e]
+# year_e_list = 
+for a, b, c, d, e,f, g, h, i in zip(df_list, df_place_list, value_list, val_list, year_list, divpy_list, div_list, divm_list, ret_list):
+    b.write(a)
+    c.write(f"Money Invested with reeinvesting: {a['Value of Shares'].sum():.2f}€")
+    d.write(f"Money Invested: {e*(monthly_invest*12):.2f}€")
+    f.write(f"Dividends Reinvested: {(a['Value of Shares'].sum()-e*(monthly_invest*12)):.2f}€")
+    g.write(f"Dividends per Year: {a['Total Dividends'].sum():.3f}€")
+    h.write(f"Dividends per Month: {a['Monthly Dividends'].sum():.3f}€")
+    ret_1 = a["Total Dividends"].sum() / a["Value of Shares"].sum()
+    i.write(f"Return: {ret_1*100:.2f}%")
+# Writing the final year as well as all the information to the top what it takes to reach your goal. This is not easily doable with a list
+# that's why I left it out.
 yearsye.write(f"It takes you {ye:.1f} Years to reach your goal.")
 money_div_end.write(f"Money Invested with reeinvesting: {df_ye['Value of Shares'].sum():.2f}€")
 div_rein_end.write(f"Dividends Reinvested: {(df_ye['Value of Shares'].sum()-ye*(monthly_invest*12)):.2f}€")
@@ -579,6 +566,8 @@ div_month_end.write(f"Dividends per Month: {df_ye['Monthly Dividends'].sum():.3f
 ret_ye = df_ye["Total Dividends"].sum() / df_ye["Value of Shares"].sum()
 return_year_end.write(f"Return: {ret_ye*100:.2f}%")
 years_end.write(f"{ye:.1f} Years.")
+
+
 all_tickers = select_all_button.checkbox("Select all", key="tickers")
 if all_tickers :
     exluded_tickers = container2.multiselect("Select all the Tickers which you want to include.",
@@ -594,42 +583,34 @@ if exlude:
     df_5_e, y5_e = calc_everything(max_stock_sector=max_sec, max_stocks=nr_of_stocks, sectors=sectors, invest_strat=invest_strat, monthly_invest=monthly_invest, max_per_stock=max_per_ps, invest_goal=invest_goal, years_wanted=5, excluded_tickers=exluded_tickers)
     df_ye_e, ye_e = calc_everything(max_stock_sector=max_sec, max_stocks=nr_of_stocks, sectors=sectors, invest_strat=invest_strat, monthly_invest=monthly_invest, max_per_stock=max_per_ps, invest_goal=invest_goal, excluded_tickers=exluded_tickers)
     # Filling the DataFrame after one year. With all it's values.
-    df_1_place.write(df_1_e)
-    value1.write(f"Money Invested with reeinvesting: {df_1_e['Value of Shares'].sum():.2f}€")
-    div1_py.write(f"Dividends Reinvested: {(df_1['Value of Shares'].sum()-y1_e*(monthly_invest*12)):.2f}€")
-    val1_nodye.write(f"Money Invested: {y1_e*(monthly_invest*12):.2f}€")
-    div1.write(f"Dividends per Year: {df_1_e['Total Dividends'].sum():.3f}€")
-    div1m.write(f"Dividends per Month: {df_1_e['Monthly Dividends'].sum():.3f}€")
-    ret_1 = df_1_e["Total Dividends"].sum() / df_1_e["Value of Shares"].sum()
-    ret1.write(f"Return: {ret_1*100:.2f}%")
-    # Filling the DataFrame after two years. With all it's values.
-    df_2_place.write(df_2_e)
-    value2.write(f"Money Invested with reeinvesting: {df_2_e['Value of Shares'].sum():.2f}€")
-    div2_py.write(f"Dividends Reinvested: {(df_2_e['Value of Shares'].sum()-y2_e*(monthly_invest*12)):.2f}€")
-    val2_nodye.write(f"Money Invested: {y2_e*(monthly_invest*12):.2f}€")
-    div2.write(f"Dividends per Year: {df_2_e['Total Dividends'].sum():.3f}€")
-    div2m.write(f"Dividends per Month: {df_2_e['Monthly Dividends'].sum():.3f}€")
-    ret_2 = df_2_e["Total Dividends"].sum() / df_2_e["Value of Shares"].sum()
-    ret2.write(f"Return: {ret_2*100:.2f}%")
-    # Filling the DataFrame after five years. With all it's values.
-    df_5_place.write(df_5_e)
-    value5.write(f"Money Invested with reeinvesting: {df_5_e['Value of Shares'].sum():.2f}€")
-    div5_py.write(f"Dividends Reinvested: {(df_5_e['Value of Shares'].sum()-y5_e*(monthly_invest*12)):.2f}€")
-    val5_nodye.write(f"Money Invested: {y5_e*(monthly_invest*12):.2f}€")
-    div5.write(f"Dividends per Year: {df_5_e['Total Dividends'].sum():.3f}€")
-    divm5.write(f"Dividends per Month: {df_5_e['Monthly Dividends'].sum():.3f}€")
-    ret_5 = df_5_e["Total Dividends"].sum() / df_5_e["Value of Shares"].sum()
-    ret5.write(f"Return per year: {ret_5*100:.2f}%")
-    # Filling the DataFrame after the goal is reached. With all it's values.
-    df_ye_place.write(df_ye_e)
-    valueye.write(f"Money Invested with reinvesting: {df_ye_e['Value of Shares'].sum():.2f}€")
-    div5_py.write(f"Dividends Reinvested: {(df_ye_e['Value of Shares'].sum()-ye_e*(monthly_invest*12)):.2f}€")
-    val_nodye.write(f"Money Invested: {ye_e*(monthly_invest*12):.2f}€")
-    divye.write(f"Dividends per Year: {df_ye_e['Total Dividends'].sum():.3f}€")
-    divmye.write(f"Dividends per Month: {df_ye_e['Monthly Dividends'].sum():.3f}€")
-    ret_ye = df_ye_e["Total Dividends"].sum() / df_ye_e["Value of Shares"].sum()
-    retye.write(f"Return: {ret_ye*100:.2f}%")
-    yearsye.write(f"It takes you {ye_e:.1f} Years to reach your goal.")
+    value_list = [value1, value2, value5, valueye]
+    dfe_list = [df_1_e, df_2_e, df_5_e, df_ye_e]
+    df_place_list = [df_1_place, df_2_place, df_5_place, df_ye_place]
+    val_list =[val1_nodye, val2_nodye, val5_nodye, val_nodye]
+    year_list = [y1_e, y2_e, y5_e, ye_e]
+    divpy_list = [div1_py, div2_py, div5_py, divye_py]
+    div_list =[div1, div2, div5, divye]
+    divm_list = [div1m, div2m, divm5, divmye]
+    ret_list = [ret1, ret2, ret5, retye]
+    for a, b, c, d, e,f, g, h, i in zip(dfe_list, df_place_list, value_list, val_list, year_list, divpy_list, div_list, divm_list, ret_list):
+        b.write(a)
+        c.write(f"Money Invested with reeinvesting: {a['Value of Shares'].sum():.2f}€")
+        d.write(f"Money Invested: {e*(monthly_invest*12):.2f}€")
+        f.write(f"Dividends Reinvested: {(a['Value of Shares'].sum()-e*(monthly_invest*12)):.2f}€")
+        g.write(f"Dividends per Year: {a['Total Dividends'].sum():.3f}€")
+        h.write(f"Dividends per Month: {a['Monthly Dividends'].sum():.3f}€")
+        ret_1 = a["Total Dividends"].sum() / a["Value of Shares"].sum()
+        i.write(f"Return: {ret_1*100:.2f}%")
+        yearsye.write(f"It takes you {ye_e:.1f} Years to reach your goal.")
+        money_div_end.write(f"Money Invested with reeinvesting: {df_ye_e['Value of Shares'].sum():.2f}€")
+        div_rein_end.write(f"Dividends Reinvested: {(df_ye_e['Value of Shares'].sum()-ye*(monthly_invest*12)):.2f}€")
+        money_no_div_end.write(f"Money Invested: {ye_e*(monthly_invest*12):.2f}€")
+        div_year_end.write(f"Dividends per Year: {df_ye_e['Total Dividends'].sum():.3f}€")
+        div_month_end.write(f"Dividends per Month: {df_ye_e['Monthly Dividends'].sum():.3f}€")
+        ret_ye = df_ye_e["Total Dividends"].sum() / df_ye_e["Value of Shares"].sum()
+        return_year_end.write(f"Return: {ret_ye*100:.2f}%")
+        years_end.write(f"{ye_e:.1f} Years.")
+    
 graphs = st.beta_expander("Click here to see a graph.")
 with graphs:
     col1, col2 = st.beta_columns(2)
