@@ -5,6 +5,7 @@ import sys
 import matplotlib.pyplot as plt
 import seaborn as sns
 # %%
+# assigning some options in order to let Pandas run through and to allow for recurssion over the maximum line.
 pd.options.mode.chained_assignment = None
 sys.setrecursionlimit(4000)
 
@@ -12,9 +13,12 @@ sys.setrecursionlimit(4000)
 def get_df():
     """
     Reads and cleans the final DataFrame which all our future calculations will be working with.
+    It filters out any unrealistic stocks, such liek stocks that have Dividned Yields above 20%
+    or equal to 0 or NA. Those are not usefull to us because they either are 0 or are way too high risk.
+    It also does cleaning in some other columns, and drops duplicates.
 
     Returns:
-        DataFrame: It's the final cleaned DataFrame.
+        div_df_final (DataFrame): It's the final cleaned DataFrame that will be used to make calculations and be filtered further.
     """
     div_df_final = pd.read_csv("/Users/m.soren/Desktop/Ironhack/Project5/Final_stock_csv")
     div_df_final.drop("Unnamed: 0", inplace=True, axis=1)
@@ -58,6 +62,20 @@ def calc_min_invest(nr_stocks,strat):
 
 
 def get_sorted_filtered_df(df,sectors,max_stock_sector,max_stocks, excluded_tickers):
+    """
+    This function takes in the final DataFrame from 'get_df'. It sorts the DataFrame according to the 'Dividend Yield' column and
+    then also takes the first x number of stocks per sector according to the user defined and passed in filters.
+
+    Args:
+        df (DataFrame): This is the final DataFrame passed in from get_df
+        sectors (List): This is the list of Sectors the user selects in the interface element (Sectors)
+        max_stock_sector (Int): This is the maximum nr of stocks that can come from the same sector, this is user defined (max_sec)
+        max_stocks (Int): This is the maximum number of stocks that the output DataFrame can contain.
+        excluded_tickers (list): A list of Tickers that the user does not want to be in the results
+
+    Returns:
+        Filter_df (DataFrame): This is the final filtered and correct lenght DataFrame
+    """
     try:
         empty_list = []
         df = df.sort_values("Dividend Yield", ascending=False)
@@ -73,6 +91,16 @@ def get_sorted_filtered_df(df,sectors,max_stock_sector,max_stocks, excluded_tick
         st.stop()
 
 def drop_cols(df):
+    """
+    Takes the original DataFrame from sorted_df and drops the columns that are not needed for the analysis.
+    It also renames some columns to make it easier to read.
+
+    Args:
+        df (DataFrame): DataFrame passed from 'sorted_df'.
+
+    Returns:
+        df_new (DataFrame): Cleaned DataFrame that only has the Columns we need with the name wanted.
+    """
     cols_drop = ['52 Week low', '52 Week high',
        '5y. Avg.Div. yield', 'Website',
        'Market Cap', 'Reccomendation', 'Profit Margin', "Long Business Summary","Beta"]
@@ -101,6 +129,18 @@ def get_min_sec_stocks(nr_of_stocks, sectors):
         return 10
 
 def calc_invest_per_part(invest_strat, monthly_invest):
+    """
+    Calculates the Money invested for each of the 3 parts the DataFrame is split up to, for the choosen investment Strategy.
+
+    Args:
+        invest_strat (Str): Investment strategy choosen by the user. (invest_strat)
+        monthly_invest (int): Monthly investment that the user enteres (for first iteration) and monthly investment + dividends for each further iteration.
+
+    Returns:
+        first_25_invest (int): The first 25% of the DataFrame will get this ammount of money
+        middle_50_invest (int): The middle 50% of the DataFrame will get this ammount of money
+        last_25_invest (int): The last 25% of the DataFrame will get this ammount of money 
+    """
     per_dict = {"Equal(25%|50%|25%)": [0.25,0.5,0.25], "Conservative(30%|50%|20%)": [0.3,0.5,0.2], "Moderate(40%|40%|20%)": [0.4,0.4,0.2], "Aggresive(55%|35%|10%)": [0.55,0.35,0.1], "Very Aggresive(75%|20%|5%)": [0.75,0.20,0.05]}
     percentage_distribution = per_dict.get(invest_strat)
     first_25_invest = monthly_invest * percentage_distribution[0]
@@ -109,6 +149,17 @@ def calc_invest_per_part(invest_strat, monthly_invest):
     return first_25_invest, middle_50_invest, last_25_invest
 
 def split_df(df):
+    """
+    This function splits the DataFrame in the 3 Parts that we use for all the calculations.
+
+    Args:
+        df (DataFrame): This is the filtered DataFrame that we will split into the 3 qual parts
+
+    Returns:
+        df_first_25 (DataFrame) : DataFrame containing the first 25% of the Original DataFrame 
+        df_middle_50 (DataFrame) : DataFrame containing the middle 50% of the Original DataFrame
+        df_last_25 (DataFrame) : DataFrame containing the last 25% of the Original DataFrame
+    """
     df_25_len = round(len(df) / 4)
     df_first_25 = df[:-(df_25_len*3)]
     df_middle_50 = df[-(df_25_len*3):-df_25_len]
@@ -116,6 +167,22 @@ def split_df(df):
     return df_first_25, df_middle_50, df_last_25
 
 def calc_inv_per_share(first_25_invest, middle_50_invest, last_25_invest, df_first_25, df_middle_50, df_last_25):
+    """
+    Calculates the Inverstment that each share gets in each of the 3 parts of the complete DataFrame
+
+    Args:
+        first_25_invest (int): The first 25% of the DataFrame will get this ammount of money
+        middle_50_invest (int): The middle 50% of the DataFrame will get this ammount of money
+        last_25_invest (int): The last 25% of the DataFrame will get this ammount of money
+        df_first_25 (DataFrame): DataFrame containing the first 25% of the Original DataFrame 
+        df_middle_50 (DataFrame): DataFrame containing the middle 50% of the Original DataFrame 
+        df_last_25 (DataFrame): DataFrame containing the last 25% of the Original DataFrame 
+
+    Returns:
+        ips_first_25 (int) : The money that each stock in the first 25% of the complete DataFrame recieves
+        ips_middle_50 (int) : The money that each stock in the middle 50% of the complete DataFrame recieves
+        ips_last_25 (int) : The money that each stock in the last 25% of the complete DataFrame recieves
+    """
     try:
         ips_first_25 = first_25_invest / len(df_first_25)
         ips_middle_50 = middle_50_invest / len(df_middle_50)
@@ -127,6 +194,23 @@ def calc_inv_per_share(first_25_invest, middle_50_invest, last_25_invest, df_fir
     
 
 def add_div_to_df_first(df_first_25, df_middle_50, df_last_25, invest_goal, invest_strat, monthly_invest):
+    """
+    This will add several columns: "Shares (Ammount of Shares held of this stock), "Value of Shares (the value of the shares hold in this stock),
+    "Total Dividends" (The amount of Dividends in a month this stock makes with the ammount of shares it has), "% Contribution to Goal" (% that this stocks
+    dividends contributes towards the user defined goal he set in the filters.)
+    ##! Attention: This is only for the FIRST itteration of the calculation. Please do not call this function if you already have compount interest.
+
+    Args:
+        df_first_25 (DataFrame): DataFrame containing the first 25% of the Original DataFrame 
+        df_middle_50 (DataFrame): DataFrame containing the middle 50% of the Original DataFrame
+        df_last_25 (DataFrame): DataFrame containing the last 25% of the Original DataFrame 
+        invest_goal (int): Monthly investment goal (achieved by dividends), entered by the user in the filter (invest_goal)
+        invest_strat (str): Investment strategy choosen by the user. (invest_strat)
+        monthly_invest (int): Monthly investment the user want's to make (monthly_invest)
+
+    Returns:
+        df_final (DataFrame):  The DataFrame that contains all the results after Month of investing. 
+    """
     first_25_invest, middle_50_invest, last_25_invest = calc_invest_per_part(invest_strat, monthly_invest)
     ips_first_25, ips_middle_50, ips_last_25 = calc_inv_per_share(first_25_invest, middle_50_invest, last_25_invest, df_first_25, df_middle_50, df_last_25)
     df_list = [df_last_25, df_middle_50, df_first_25]   
@@ -140,6 +224,23 @@ def add_div_to_df_first(df_first_25, df_middle_50, df_last_25, invest_goal, inve
     return df_final
 
 def add_div_to_df_after(df_first_25, df_middle_50, df_last_25, total_div, invest_monthly, invest_strat):
+    """
+    This will do the same as 'add_div_to_df_first' only difference is that it takes into account 
+    the dividends collected last month and therefore invests more (compount interest)
+    ##! Attention: This function should be called after the first month ran through. It will factor in the compount interest. 
+
+    Args:
+        df_first_25 (DataFrame): DataFrame containing the first 25% of the Original DataFrame 
+        df_middle_50 (DataFrame): DataFrame containing the middle 50% of the Original DataFrame
+        df_last_25 (DataFrame): DataFrame containing the last 25% of the Original DataFrame 
+        invest_goal (int): Monthly investment goal (achieved by dividends), entered by the user in the filter (invest_goal)
+        invest_strat (str): Investment strategy choosen by the user. (invest_strat)
+        monthly_invest (int): Monthly investment the user want's to make (monthly_invest)
+        total_div (int) : Total Dividends from the last month of investing
+
+    Returns:
+        df_final (DataFrame):  The DataFrame that contains all the results after Month of investing. 
+    """
     invest_monthly_new = invest_monthly + total_div
     first_25_invest, middle_50_invest, last_25_invest = calc_invest_per_part(invest_strat, invest_monthly_new)
     ips_first_25, ips_middle_50, ips_last_25 = calc_inv_per_share(first_25_invest, middle_50_invest, last_25_invest, df_first_25, df_middle_50, df_last_25)
@@ -154,6 +255,16 @@ def add_div_to_df_after(df_first_25, df_middle_50, df_last_25, total_div, invest
     return df_final
 
 def check_if_goal_reached(df, invest_goal):
+    """
+    Checks if the user defined goal montly dividends goal is reached by the investment done so far
+
+    Args:
+        df (DataFrame): The DataFrame that should be checked
+        invest_goal (int): Investment Goal that the user defined (invest_goal)
+
+    Returns:
+        Boolean: Returns True if investgoal is achieved, returns False otherwise
+    """
     total_div = df["Total Dividends"].sum()
     if total_div >= invest_goal:
         return True
@@ -161,6 +272,23 @@ def check_if_goal_reached(df, invest_goal):
         return False
 
 def check_if_max_percent_reached(df, max_per_stock):
+    """
+    Checks if any stocks have reached the max % contribution towards the investment_goal.
+    If a stock has reached maxiumum contribution, it needs to be seperated because we do not want to invest further into this stock,
+    and rather distribute the Investment through the remiaining ones.
+
+    Args:
+        df (DataFrame): The DataFrame that should be checked
+        max_per_stock (int): The % that a single stock can at most contribute towards the goal
+
+    Returns:
+        If a stock has reached max --> Splits the DataFrame in two.
+            df_no_max_per (DataFrame) : DataFrame with all stocks that have not yet reached the maximum contribution
+            df_max_per (DataFrame) : DataFrame with all stocks that have reached the maximum contribution
+        If no stock has reached max --> Returns DataFrame and 0 (to have two outputs)
+            df (DataFrame) : Full DataFrame that was passed into the function
+            0 (int) : This is passed so the function always has two outputs no matter the outcome.
+    """
     a = df[df["% Contribution to Goal"] >= max_per_stock].index.tolist()
     if len(a) == 0:
         return df, 0
@@ -170,12 +298,33 @@ def check_if_max_percent_reached(df, max_per_stock):
     return df_no_max_per, df_max_per
 
 def get_frequency_details(column, df):
+    """
+    Calculates the Frequence of categories in a given column
+
+    Args:
+        column (pandas Series): A column we can choose where we want to calculate the frequency of each value
+        df (DataFrame): The DataFrame we want to work this function on
+
+    Returns:
+        Df_info_dict (dictionary): A dictionary containing the keys and values of how often a given word / value is in the choosen column.
+    """
     df_info = df[column].value_counts()
     my_info = dict(df_info)
     df_info_dict = { key:[value] for key, value in my_info.items() }    
     return df_info_dict
 
 def calc_total_div(df_no_max, df_max):
+    """
+    Calculates the total dividends of the all DataFrames. This will be added onto the Monthly investment.
+    Checks if df_max is an integer which then means that there is only one DataFrame (df_no_max) and calculates accordingly
+
+    Args:
+        df_no_max (DataFrame): This is the DataFrame containing all Stocks that have not yet reached maximumm contribution
+        df_max (DataFrame): The DataFrame that contains Stocks that have reached max contribution
+
+    Returns:
+        total_div (int) : The total dividends that the DataFrames reached as a whole.
+    """
     if type(df_max) == int:  
         total_div = df_no_max["Total Dividends"].sum()
     else:
@@ -183,6 +332,17 @@ def calc_total_div(df_no_max, df_max):
     return total_div
 
 def combine_df(df_nomax, df_max):
+    """
+    Combines the DataFrames in order to make sure the whole function recussion works again.
+    Also checks if df_max is an int so it can just return df_nomax when it is, because then df_noax is the only DataFrame
+    Args:
+        df_nomax (DataFrame): This is the DataFrame containing all Stocks that have not yet reached maximumm contribution
+        df_max (DataFrame): The DataFrame that contains Stocks that have reached max contribution
+
+    Returns:
+        df_final (DataFrame) : Combined DataFrame from stocks that have and haven't reached max contribubtion yed. Sorted by 'Dividend Yield' 
+        df_nomax (DataFrame) : DataFrame that is equal to df_nomax because there aren't two DataFrames.
+    """
     if type(df_max) == int:
         return df_nomax
     else:
@@ -191,6 +351,30 @@ def combine_df(df_nomax, df_max):
         return df_final
 
 def calc_everything(max_stock_sector, max_stocks, sectors, invest_strat, monthly_invest, max_per_stock, invest_goal, years_wanted=None, df=None, total_div=0, execution=0, excluded_tickers=[]):
+    """
+    This is THE MAIN FUNCTION. This funcction calls all other functions in the right order and calls itself until a return statement is reached.
+    It calls itself, until either the check_if_goal returns true, or if the wanted years are reached.
+    The Function makes the DataFrame if none is passed, and checks if it's the first running of the function. It calls the needed function accordingly.
+
+    Args:
+        max_stock_sector (int): This is the maximum nr of stocks that can come from the same sector, this is user defined (max_sec)
+        max_stocks (int): This is the maximum number of stocks that the output DataFrame can contain.
+        sectors (list): List that is returned from the 'sectors' selectionbox in the interface
+        invest_strat (str): Investment strategy selected by the user (invest_strat)
+        monthly_invest (int): Monthly investment that the user wants to put into stocks. (monthly_invest)
+        max_per_stock (int): Maximum amount of percentage that a stock can contribute towards the dividends goal 
+        invest_goal (int): Investment goal that the user wants to have per month from the Dividends
+        years_wanted (int, optional): This can be called to get the Results after 1-2-5 or howevermany years you want. Defaults to None.
+        df (DataFrame, optional): DataFrame with what all calculations should be done. Defaults to None.
+        total_div (int, optional): Total Dividends from all the Stocks so far. Defaults to 0.
+        execution (int, optional): How many times the Function has run so far. Executions is equivalent to Months. Defaults to 0.
+        excluded_tickers (list, optional): A list of tickers that the user does not want in the Results and wants to be exluded. Defaults to [].
+
+    Returns:
+        df_recombined: The DataFrame that has all results needed to display it or go on with further calculations
+        years_calc = The years that the function has run until it reached the Goal.
+        years_wanted = The Years that you wanted the function to run.
+    """
     if df is None:
         df_initial = get_df()
         df_sorted = get_sorted_filtered_df(df_initial,sectors,max_stock_sector,max_stocks, excluded_tickers)
@@ -221,16 +405,21 @@ def calc_everything(max_stock_sector, max_stocks, sectors, invest_strat, monthly
 # %%
 
 # %%
+# Loading the initial DataFrame in order to fill out the multiselect boxes below ("sectors")
 df = get_df()
-st.title("Welcome to the Dividens investment Helper or so.")
 # %%
+
+# Starting to define the Website through Streamlit (st)
+st.title("Welcome to the Dividens investment Helper or so.")
 sidebar = st.sidebar
+# Defining all the filters needed for the calculations in the sidebar.
 with sidebar:
     invest_goal = st.number_input(label="Monthly investment Goal.", min_value=100, step=50, help="How much money you want to have before taxes each month through dividends")
     max_per_ps = st.number_input(label="Max. percent a single stock can contribute towards the goal.", min_value=0, max_value=100, step=10, help="Once a stock reaches this number, it will be no longer invested into, and other stocks will recieve more funds. If put at 100 or very high, it wont stop investing into certain stocks, untill it reached the goal.")
     nr_of_stocks = st.number_input(label="Nr. of stocks.", min_value=10, max_value=100, step=10,  help="Input the number of stocks you want to recieve as reccomendations.")
     container1 = st.beta_container()
     all_sectors = st.checkbox("Select all", key="sectors")
+    # This if-else checks if the checkbox "all_sectors" is checked. If so it populates the multiselect with all the sectors that are in the DataFrame (df)
     if all_sectors:
         sectors = container1.multiselect("Select all the sectors which you want to include.",
             df["Sector"].unique().tolist(),df["Sector"].unique().tolist(), help="If you want to de-select all just press the button below again.")
@@ -243,6 +432,7 @@ with sidebar:
     search = st.button("Search")
 st.subheader("You can see your filters and choices below.")
 st.write("---")
+# This is the section that shows all the selected filters from the sidebar
 col1, col2, col3 = st.beta_columns(3)
 with col1:
     st.write(f"Monthly dividends goal: {invest_goal}€")
@@ -280,6 +470,7 @@ with colc:
 st.subheader("Check out more information below, like all the stocks you should invest in.")
 st.write("---")
 
+# Defining all placeholders for the DataFrames 1-Endyear. This will be used later.
 with st.beta_expander("Stocks after 1 Years"):
     df_1_place = st.empty()
     col1, col2, col3, col4, col5, col6 = st.beta_columns((1,1.5,1.5,1.5,1.5,1))
@@ -397,10 +588,12 @@ else:
         df_1["Ticker"].unique().tolist(),help="If you want to select all just press the button below.")
 exlude = exclude.button("Exclude")
 if exlude:
+    # Calculate the DataFrame once the user has input Tickers to be excluded, and hit the "exclude" button.
     df_1_e, y1_e = calc_everything(max_stock_sector=max_sec, max_stocks=nr_of_stocks, sectors=sectors, invest_strat=invest_strat, monthly_invest=monthly_invest, max_per_stock=max_per_ps, invest_goal=invest_goal, years_wanted=1, excluded_tickers=exluded_tickers)
     df_2_e, y2_e = calc_everything(max_stock_sector=max_sec, max_stocks=nr_of_stocks, sectors=sectors, invest_strat=invest_strat, monthly_invest=monthly_invest, max_per_stock=max_per_ps, invest_goal=invest_goal, years_wanted=2, excluded_tickers=exluded_tickers)
     df_5_e, y5_e = calc_everything(max_stock_sector=max_sec, max_stocks=nr_of_stocks, sectors=sectors, invest_strat=invest_strat, monthly_invest=monthly_invest, max_per_stock=max_per_ps, invest_goal=invest_goal, years_wanted=5, excluded_tickers=exluded_tickers)
     df_ye_e, ye_e = calc_everything(max_stock_sector=max_sec, max_stocks=nr_of_stocks, sectors=sectors, invest_strat=invest_strat, monthly_invest=monthly_invest, max_per_stock=max_per_ps, invest_goal=invest_goal, excluded_tickers=exluded_tickers)
+    # Filling the DataFrame after one year. With all it's values.
     df_1_place.write(df_1_e)
     value1.write(f"Money Invested with reeinvesting: {df_1_e['Value of Shares'].sum():.2f}€")
     div1_py.write(f"Dividends Reinvested: {(df_1['Value of Shares'].sum()-y1_e*(monthly_invest*12)):.2f}€")
@@ -409,6 +602,7 @@ if exlude:
     div1m.write(f"Dividends per Month: {df_1_e['Monthly Dividends'].sum():.3f}€")
     ret_1 = df_1_e["Total Dividends"].sum() / df_1_e["Value of Shares"].sum()
     ret1.write(f"Return: {ret_1*100:.2f}%")
+    # Filling the DataFrame after two years. With all it's values.
     df_2_place.write(df_2_e)
     value2.write(f"Money Invested with reeinvesting: {df_2_e['Value of Shares'].sum():.2f}€")
     div2_py.write(f"Dividends Reinvested: {(df_2_e['Value of Shares'].sum()-y2_e*(monthly_invest*12)):.2f}€")
@@ -417,6 +611,7 @@ if exlude:
     div2m.write(f"Dividends per Month: {df_2_e['Monthly Dividends'].sum():.3f}€")
     ret_2 = df_2_e["Total Dividends"].sum() / df_2_e["Value of Shares"].sum()
     ret2.write(f"Return: {ret_2*100:.2f}%")
+    # Filling the DataFrame after five years. With all it's values.
     df_5_place.write(df_5_e)
     value5.write(f"Money Invested with reeinvesting: {df_5_e['Value of Shares'].sum():.2f}€")
     div5_py.write(f"Dividends Reinvested: {(df_5_e['Value of Shares'].sum()-y5_e*(monthly_invest*12)):.2f}€")
@@ -425,6 +620,7 @@ if exlude:
     divm5.write(f"Dividends per Month: {df_5_e['Monthly Dividends'].sum():.3f}€")
     ret_5 = df_5_e["Total Dividends"].sum() / df_5_e["Value of Shares"].sum()
     ret5.write(f"Return per year: {ret_5*100:.2f}%")
+    # Filling the DataFrame after the goal is reached. With all it's values.
     df_ye_place.write(df_ye_e)
     valueye.write(f"Money Invested with reinvesting: {df_ye_e['Value of Shares'].sum():.2f}€")
     div5_py.write(f"Dividends Reinvested: {(df_ye_e['Value of Shares'].sum()-ye_e*(monthly_invest*12)):.2f}€")
