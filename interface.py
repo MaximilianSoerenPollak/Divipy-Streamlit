@@ -410,7 +410,9 @@ df = get_df()
 # %%
 
 # Starting to define the Website through Streamlit (st)
-st.title("Welcome to the Dividens investment Helper or so.")
+st.title("Welcome to Divipy")
+st.subheader("Please note that this is a prototype.")
+st.subheader("Document any mistakes or bugs you see, as well as any feature requests and E-Mail them to our Prototype-Lead.")
 sidebar = st.sidebar
 # Defining all the filters needed for the calculations in the sidebar.
 with sidebar:
@@ -611,17 +613,17 @@ if exlude:
     return_year_end.write(f"Return: {ret_ye*100:.2f}%")
     years_end.write(f"{ye_e:.1f} Years.")
     
-graphs = st.beta_expander("Click here to see a graph.")
-with graphs:
-    col1, col2 = st.beta_columns(2)
-    with col1:
-        df_info_dict = get_frequency_details("Sector", df)
-        keys = list(df_info_dict.keys())
-        vals = [float(df_info_dict[k][0]) for k in keys]
-        fig4, ax4 = plt.subplots(figsize=(12,8))
-        plt.style.use("dark_background")
-        sns.set(style="darkgrid")
-        ax4.set_title("Distribution of Stocks in Sectors", size='16', fontweight='bold')
-        chart = sns.barplot(x=keys,y=vals, ax=ax4)
-        chart.set_xticklabels(chart.get_xticklabels(), rotation=45, horizontalalignment='right')
-        st.pyplot(fig4)
+# graphs = st.beta_expander("Click here to see a graph.")
+# with graphs:
+#     col1, col2 = st.beta_columns(2)
+#     with col1:
+#         df_info_dict = get_frequency_details("Sector", df)
+#         keys = list(df_info_dict.keys())
+#         vals = [float(df_info_dict[k][0]) for k in keys]
+#         fig4, ax4 = plt.subplots(figsize=(12,8))
+#         plt.style.use("dark_background")
+#         sns.set(style="darkgrid")
+#         ax4.set_title("Distribution of Stocks in Sectors", size='16', fontweight='bold')
+#         chart = sns.barplot(x=keys,y=vals, ax=ax4)
+#         chart.set_xticklabels(chart.get_xticklabels(), rotation=45, horizontalalignment='right')
+#         st.pyplot(fig4)
