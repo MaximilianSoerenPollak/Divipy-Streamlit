@@ -20,7 +20,7 @@ def get_df():
     Returns:
         div_df_final (DataFrame): It's the final cleaned DataFrame that will be used to make calculations and be filtered further.
     """
-    div_df_final = pd.read_csv("/Users/m.soren/Desktop/Ironhack/Project5/Final_stock_csv")
+    div_df_final = pd.read_csv("Final_stock_csv")
     div_df_final.drop("Unnamed: 0", inplace=True, axis=1)
     div_yield = (div_df_final["Dividend Rate"] / div_df_final["Current Price"]).round(4)
     div_df_final["Dividend Yield"] = div_yield
