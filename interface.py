@@ -411,8 +411,6 @@ df = get_df()
 
 # Starting to define the Website through Streamlit (st)
 st.title("Welcome to Divipy")
-st.subheader("Please note that this is a prototype.")
-st.subheader("Document any mistakes or bugs you see, as well as any feature requests and E-Mail them to our Prototype-Lead.")
 sidebar = st.sidebar
 # Defining all the filters needed for the calculations in the sidebar.
 with sidebar:
