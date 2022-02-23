@@ -4,12 +4,6 @@ This is a small app, build with Streamlit. It will recommend up to 100 Stocks (w
 This is build, to help you find new stocks and then go and research them further. **This is NOT investment advice**, rather a help for finding new opportunities.</p> 
 
 ---
-
-### Please note:
-
-<h3>I'm currently working on porting this app to Django, as well as expanding it's possibilities. </h3>
-
----
 ## How it works
 
 <p>The application will take into account all of the filters and inputs, then look through round about 40k Stocks that pay out dividends. It will then calculate how long it takes to get to your goal, and how much money you need to invest in total, and in each stock. It will give you DataFrame Tables after 1-2-5Years and once you have reached your goal. You also have the option to exclude any Stock that it has spit out, in case you do not want that stock included.
